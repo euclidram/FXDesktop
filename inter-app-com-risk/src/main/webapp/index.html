@@ -1,0 +1,439 @@
+<html>
+<head>
+<link href="http://cdn.sencha.com/ext/gpl/4.2.0/resources/css/ext-all.css" rel="stylesheet" />
+<link rel="icon" href="http://localhost:9000/parent/images/favicon.jpg" type="image/x-icon"> 
+<link  href="http://localhost:9000/parent/stylesheet/vertical_menu.css" rel="stylesheet"> 
+<title>Risk Blotter</title>
+</head>
+<body>
+<div id="banner" ><img src="http://localhost:9000/parent/images/banner.jpg"><img style="float :right" src="http://localhost:9000/parent/images/risk.jpg"></div>
+<div id="header"><img src="http://localhost:9000/parent/images/header.jpg"></div>
+<table style="border: 0px; width: 100%;">
+<tr>
+<td style="width: 7%; margin-top: 2em;font-size:12px;">
+<div id="menu" style="margin-top: 2em; ">
+  <ul>
+    <li><a href="javascript: displayGrid();" title="Home">Home</a></li>
+    <li><a href="#form" id="form" title="About">Risk Form</a></li>
+    
+  </ul>
+</div>
+</td>
+<td style="width: 90%; padding-left: 2em; margin-top: 1em; ">
+<div id="grid-example" style=""></div>
+<div id="riskForm" style="padding-left: 2em; margin-top: 1em;display: none;"></div>
+</td>
+</tr>
+</table >
+<table>
+<tr>
+<td></td>
+<td id="tabid" style="border : 1px solid #B8CFEE;vertical-align: top;display:none;">
+<table>
+<tr><td id="msg" align="left" style="background-color: #B8CFEE;border : 1px solid #B8CFEE;color:#0440A4;font-size:11px;display:none;"><b>Messages From Other Applications :</b></td>
+</tr>
+<tr>
+<td id="div" style="display:none;font-size: 12px">
+<div id="test" style="margin-left: 2em;margin-top:2em;margin-bottom: 2em; color: #0440A4;"></div>
+<div id="ackMessage" style="margin-left: 2em;margin-bottom: 2em; color: #0440A4;"></div>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+<div id="tabs"></div>
+<script src="http://cdn.sencha.com/ext/gpl/4.2.0/ext-all.js"></script>
+<script src="http://localhost:9000/parent/scripts/httpstateprovider.js"></script>
+<script src="http://localhost:9000/parent/scripts/messagebus.js"></script>
+
+<script>
+
+Ext.require([
+             'Ext.grid.*',
+             'Ext.data.*',
+             'Ext.util.*',
+             'Ext.state.*'
+         ]);
+
+		// setup the state provider, all state information will be saved to a cookie
+         Ext.onReady(function() {
+              Ext.QuickTips.init();
+             var cp = Ext.create('ParentApp.util.HttpStorageProvider',{
+    			 userid: 'Srini',
+    			 url: "http://localhost:9000/parent/state"
+    		});
+            Ext.state.Manager.setProvider(cp); 
+            
+            Ext.util.Observable.observe(Ext.ux.MessageBroker);
+        	Ext.ux.MessageBroker.on('message', function(msg) {
+        	    console.log('message fired: ',msg);
+        	    window.opener.postMessage(msg, "http://localhost:9000/");
+        	});
+	
+             // sample static data for the store
+             var myData = [
+                 ['46625HBV1','JPMORGAN CHASE & CO','5.1250','19/15/2014','10.00','97,000.00','100.23','0.02','10.00','56.23','-41.85 ','A-','A','Baa1','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['177967CQ2','CITIGROUP INC','5.0000','19/15/2014','10.00','250,000.00','100.22','0.14','10.00','76.17','-29.9 ','BBB+','A-','Baa3','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['989701AX5','ZIONS BANCORP','7.7500','19/23/2014','10.00','250,000.00','100.50','0.29','10.00','105.82','-15.02 ','BBB-','BBB-',' ','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['7801497L5','ROYAL BK SCOTLND GRP PLC','5.0000','10/01/2014','10.00','250,000.00','100.39','0.58','10.00','129.6','14.47 ','BB+','BB+','B1','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['970021FG4','BEAR STERENS COS LLC','2.1520','09/15/2014','10.00','241,109.00','100.67','25.25','10.00','1.37','-17.31 ','BB-','AAA+','Baa8','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['949748ET3','WELLS FARGO & COMPANY','3.7500','10/01/2014','10.00','250,000.00','100.33','0.04','10.00','19','-39.55 ','A+','AA-','A2','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['38143UAW1','GOLDMAN SACHS GROUP INC','5.0000','10/01/2014','10.00','141,000.00','100.43','0.17','10.00','38.52','-27.49','A-','A','Baa1','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['172967EZ0','CITIGROUP INC','5.0000','19/15/2014','10.00','250,000.00','100.67','0.25','10.00','25.37','-19.41 ','A-','A','Baa3','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['742851DH2','PRIVATE EXPERT FUNDING','5.2300','19/05/2014','10.00','240,000.00','100.67','1.25','10.00','25.37','-19.41 ','AA','A+','Baa3','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['90331HKP7','US BANK NA','1.2000','19/15/2014','10.00','140,000.00','100.67','2.25','10.00','20.37','-13.41 ','BB+','AB','Baa4','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['78008TXA7','ROYAL BANK OF CANADA','5.7500','19/23/2014','10.00','250,000.00','100.50','0.29','10.00','105.82','-15.02 ','BBB-','BBB-',' ','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['174567EZ0','CITIGROUP INC','5.0000','19/15/2014','10.00','250,000.00','100.67','0.25','10.00','25.37','-19.41 ','A-','A','Baa3','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['974521FG4','BEAR STERENS COS LLC','2.1520','09/15/2014','10.00','241,109.00','100.67','25.25','10.00','1.37','-17.31 ','BB-','AAA+','Baa8','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['093662AC8','BLOCK FINANCIAL LLC','4.0012','14/15/2014','10.00','142.250.00','100.37','8.25','10.00','25.37','-19.41 ','A-','A','Baa3','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['929762SF7','WELLS FARGO BANK NA','5.7500','10/01/2014','10.00','148,400.00','100.33','2.54','10.00','45','-39.55 ','A+','AA+','Ba2','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['7591EPAF7','REGIONS FINANCIAL CORP','4.1504','05/24/2014','10.00','450,000.00','100.67','1.25','10.00','15.37','-19.41 ','A-','A','Baa3','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['78442FAE8','NAVIENT LLC','1.0000','19/15/2014','10.00','250,000.00','100.67','0.25','10.00','25.37','-19.41 ','A-','A','Baa3','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['784567AL5','ROYAL BK SCOTLND GRP PLC','5.0000','10/01/2014','10.00','250,000.00','100.39','0.58','10.00','129.6','14.47 ','BB+','BB+','B1','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['82400EFG7','GENERAL ELEC CAP CORP','5.0000','19/15/2014','10.00','250,000.00','100.67','0.25','10.00','25.37','-19.41 ','A-','A','Baa3','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['742651DH2','PRIVATE EXPERT FUNDING','5.2300','19/05/2014','10.00','240,000.00','100.67','1.25','10.00','25.37','-19.41 ','AA','A+','Baa3','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['970031FG4','BEAR STERENS COS LLC','2.1520','09/15/2014','10.00','241,109.00','100.67','25.25','10.00','1.37','-17.31 ','BB-','AAA+','Baa8','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['78447DSE8','NAVIENT LLC','1.0000','19/15/2014','10.00','250,000.00','100.67','0.25','10.00','25.37','-19.41 ','A-','A','Baa3','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['172967EZ0','NATL CITY BK OF INDIANA','5.0000','19/15/2014','10.00','250,000.00','100.67','0.25','10.00','25.37','-19.41 ','A-','A','Baa3','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['480084DF3','BANK OF AMERICA CORP','5.0000','19/15/2014','10.00','250,000.00','100.67','0.25','10.00','25.37','-19.41 ','A-','A','Baa3','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['82424DSG7','GENERAL ELEC CAP CORP','5.0000','19/15/2014','10.00','250,000.00','100.67','0.25','10.00','25.37','-19.41 ','A-','A','Baa3','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['742651DH2','PRIVATE EXPERT FUNDING','5.2300','19/05/2014','10.00','240,000.00','100.67','1.25','10.00','25.37','-19.41 ','AA','A+','Baa3','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['970045RT7','FRANKLIN RESOURCES INC','2.1520','09/15/2014','10.00','241,109.00','100.67','25.25','10.00','1.37','-17.31 ','BB-','AAA+','Baa8','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['78478DAE8','NAVIENT LLC','1.0000','19/15/2014','10.00','250,000.00','100.67','0.25','10.00','25.37','-19.41 ','A-','A','Baa3','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['172967SD0','CITIGROUP INC','5.0000','19/15/2014','10.00','250,000.00','100.67','0.25','10.00','25.37','-19.41 ','A-','A','Baa3','UST 0.375 05/31/2016','Rav Ducharme'],
+				 ['78544SFF3','BANK OF AMERICA CORP','5.0000','19/15/2014','10.00','250,000.00','100.67','0.25','10.00','25.37','-19.41 ','A-','A','Baa3','UST 0.375 05/31/2016','Rav Ducharme']
+             ];
+
+             /**
+              * Custom function used for column renderer
+              * @param {Object} val
+              */
+             function Coupon(val) {
+                 if (val =='5.0000') {
+                     return '<span style="color:green;">' + val + '</span>';
+                 } else {
+                     return '<span style="color:red;">' + val + '</span>';
+                 }
+                 return val;
+             }
+
+             /**
+              * Custom function used for column renderer
+              * @param {Object} val
+              */
+             function AskYield(val) {
+                 if (val > 10) {
+                     return '<span style="color:green;">' + val + '%</span>';
+                 } else  {
+                     return '<span style="color:red;">' + val + '%</span>';
+                 }
+                 return val;
+             }
+			  function Bidpread(val) {
+                 if (val > 50) {
+                     return '<span style="color:green;">' + val + '%</span>';
+                 } else  {
+                     return '<span style="color:red;">' + val + '%</span>';
+                 }
+                 return val;
+             }
+
+             // create the data store
+             var store = Ext.create('Ext.data.ArrayStore', {
+                 fields: [
+                    {name: 'Cusip'},
+                    {name: 'Issuer'},
+                    {name: 'Coupon'},
+					{name: 'Maturity'},
+					{name: 'Antity'},
+					{name: 'AskQuantity'},
+					{name: 'AskPrice'},
+					{name: 'AskYield'},
+					{name: 'MinAskQuantity'},										
+					{name: 'Bidpread'},
+					{name: 'AskSpread'},
+					{name: 'RatingSP'},
+					{name: 'RatingFitch'},
+					{name: 'RatingMoody'},
+					{name: 'Benchmark'},	
+					{name: 'TradeName'}
+                 ],
+                 data: myData
+             });
+
+             // create the Grid
+             var grid = Ext.create('Ext.grid.Panel', {
+                 store: store,
+                 stateful: true,
+                 stateId: 'orderGrid',
+                 columns: [
+                     {
+                         text     : 'Cusip',                        
+                         sortable : false,
+                         dataIndex: 'Cusip',
+						 
+                     },
+                     {
+                         text     : 'Issuer',
+                         width    : 75,
+                         sortable : true,                        
+                         dataIndex: 'Issuer'						
+                     },
+                     {
+                         text     : 'Coupon',
+                         width    : 75,
+                         sortable : true,  
+						 renderer : Coupon,
+                         dataIndex: 'Coupon'						 
+                     },
+                     {
+                         text     : 'Maturity',
+                         width    : 75,
+                         sortable : true,                         
+                         dataIndex: 'Maturity'					
+                     },
+					 {
+                         text     : 'Antity',
+                         width    : 75,
+                         sortable : true,                         
+                         dataIndex: 'Antity'						 
+                     },
+					 {
+                         text     : 'Ask Quantity',
+                         width    : 75,
+                         sortable : true, 						 
+                         dataIndex: 'AskQuantity'						
+                     },
+					 {
+                         text     : 'Ask Price',
+                         width    : 75,
+                         sortable : true,                       
+                         dataIndex: 'AskPrice'						 
+                     },
+					  {
+                         text     : 'Ask Yield',
+                         width    : 75,
+                         sortable : true,   
+						 renderer : AskYield,
+                         dataIndex: 'AskYield'						 
+                     },
+					 {
+                         text     : 'Min AskQuantity',
+                         width    : 75,
+                         sortable : true,                         
+                         dataIndex: 'MinAskQuantity'						
+                     },
+					 {
+                         text     : 'Bid pread',
+                         width    : 75,
+                         sortable : true,   
+						 renderer : Bidpread,
+                         dataIndex: 'Bidpread',
+						 
+                     },
+					 {
+                         text     : 'Ask Spread',
+                         width    : 75,
+                         sortable : true,                         
+                         dataIndex: 'AskSpread',
+						
+                     },
+					 {
+                         text     : 'Rating SP',
+                         width    : 75,
+                         sortable : true,                         
+                         dataIndex: 'RatingSP',
+						 
+                     },
+					 {
+                         text     : 'Rating Fitch',
+                         width    : 75,
+                         sortable : true,                         
+                         dataIndex: 'RatingFitch',
+						 
+                     },
+					 {
+                         text     : 'Rating Moody',
+                         width    : 75,
+                         sortable : true,                     
+                         dataIndex: 'RatingMoody',
+						 
+                     },
+					 {
+                         text     : 'Benchmark',
+                         width    : 75,
+                         sortable : true,                        
+                         dataIndex: 'Benchmark',
+						 
+                     },
+					 {
+                         text     : 'Trade Name',
+                         width    : 75,
+                         sortable : true,                         
+                         dataIndex: 'TradeName',
+						 
+                     },
+                     {
+                         xtype: 'actioncolumn',
+						 
+                         width: 50,
+                         items: [{
+                             icon   : 'http://dev.sencha.com/deploy/ext-4.0.1/examples/shared/icons/fam/user.gif',  // Use a URL in the icon config
+                             tooltip: 'Notify Trader Blotter',
+                             handler: function(grid, rowIndex, colIndex) {
+                                 var rec = store.getAt(rowIndex);
+                                 console.log("Sell " + rec.get('Cusip'));			
+                                 Ext.ux.MessageBroker.sendMessage("Notify Trader Blotter App:", {"Cusip": rec.get('Cusip'), "system":"Risk"});
+                             }
+                         }]
+                     }
+                 ],
+				 defaults: {
+							flex: 1
+						},
+					handler: 
+				setInterval(function(){
+				var x = Math.floor((Math.random() * 30) + 1);
+                grid.getView().refresh();
+				//grid.getView().focusRow(x); 
+				var yieldvalue=Math.floor(grid.getStore().getAt(x).data.AskYield);					
+				yieldvalue=(yieldvalue+yieldvalue+5)/2;
+				grid.getStore().getAt(x).data.AskYield=yieldvalue;
+				var bidvalue=Math.floor(grid.getStore().getAt(x).data.Bidpread);
+				bidvalue=(bidvalue+bidvalue+5)/2;
+				grid.getStore().getAt(x).data.Bidpread=bidvalue;
+                                                                              
+                },500),				
+                 height: 350, 
+				 width:1100,
+                 title: 'Risk Blotter',
+                 renderTo: 'grid-example',
+                 viewConfig: {
+                     stripeRows: true					
+                 }
+             });			 			
+         });
+
+
+	
+		 
+		 
+		 
+        //respond to events
+		function listener(event) {
+			if(event.origin !== 'http://localhost:9000') return;
+			
+			
+			  if(event.origin == 'http://localhost:9000' && event.data.data.idname == 'Submit') {
+					document.getElementById("tabid").style.display = 'block';
+					document.getElementById("msg").style.display = 'block';
+					document.getElementById("div").style.display = 'block';
+          			document.getElementById("ackMessage").innerHTML ='Received response from  Trader Blotter : '+event.data.msg +': Trader Number :' + event.data.data.TSTradeNumber  ;
+					event.source.postMessage('Acknowledged message',event.origin);
+          		}else{
+					document.getElementById("tabid").style.display = 'block';
+					document.getElementById("msg").style.display = 'block';
+					document.getElementById("div").style.display = 'block';
+					document.getElementById("test").innerHTML = 'Received response from '+event.data.data.system+':  '+event.data.msg +': Trader Number:' + event.data.data.TSTradeNumber;
+					event.source.postMessage('Acknowledged message',event.origin);
+				}
+          		
+		}
+		
+		if(window.addEventListener) {
+			addEventListener("message", listener, false);
+		}
+		else {
+			attachEvent("onmessage", listener);
+		}
+			
+			Ext.get('form').on('click',function(){
+			if(document.getElementById("riskForm").innerHTML == "")
+			{
+			document.getElementById("grid-example").style.display = 'none';
+	           document.getElementById("riskForm").style.display = 'block';
+			   Ext.create('Ext.form.Panel', {
+			   title: 'Risk Form',
+			   bodyPadding: 5,
+			   height: 170,
+			   width: 600,
+
+
+				// Fields will be arranged vertically, stretched to full width
+				layout: 'anchor',
+				defaults: {
+					anchor: '100%'
+				},
+
+				// The fields
+				defaultType: 'textfield',
+				items: [{
+					fieldLabel: 'Cusip',
+					name: 'Cusip',
+					allowBlank: false
+				},{
+					fieldLabel: 'Issuer',
+					name: 'riskIssuer',
+					allowBlank: false
+				},{
+					fieldLabel: 'Coupon',
+					name: 'riskCoupon',
+					allowBlank: false
+				},{
+					fieldLabel: 'Trade Name',
+					name: 'riskTradeName',
+					allowBlank: false
+				}],
+
+				// Reset and Submit buttons
+				buttons: [{
+				 text     : 'Submit',
+				 id : 'Submit',
+				 listeners: {
+					click:  function() {
+					
+					var form = this.up('form').getForm();
+					var rcusip = form.findField("Cusip").getValue();
+					var rissuer = form.findField("riskIssuer").getValue();
+					var rcoupon = form.findField("riskCoupon").getValue();
+					var rtradename = form.findField("riskTradeName").getValue();
+				
+					if(!rissuer.match(/^[A-Za-z\s]+$/)){
+						 alert(" Issuer Field must be Alphabetics ");
+						 return;
+					}
+					if(!rcoupon.match(/^[-+]?[0-9]+\.[0-9]+$/)){
+						alert("Coupon should be in decimal format");
+						return;
+					}
+					if (!rtradename.match(/^[A-Za-z\s]+$/)){
+						alert("Trade Name must be Alphabetics  ");
+						return;
+					}																				
+					
+					var id =this.id;
+					alert ("Message is sent to Trader Blotter and Web conductor");
+					Ext.ux.MessageBroker.sendMessage("Risk has been added: ", {"Cusip": rcusip, "system":"Trader" ,"idname": id});
+							form.reset();
+							
+
+						}
+				}
+				}],
+				renderTo: 'riskForm'
+			});
+			}
+			
+			   
+	        	});
+			
+		function displayGrid(){
+		document.getElementById('grid-example').style.cssText = ''
+		document.getElementById("riskForm").innerHTML= '';
+		}
+		
+</script>
+</body>
+
+</html>

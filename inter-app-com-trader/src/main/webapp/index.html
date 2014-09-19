@@ -1,0 +1,445 @@
+<html>
+<head>
+<link href="http://cdn.sencha.com/ext/gpl/4.2.0/resources/css/ext-all.css" rel="stylesheet" />
+<link rel="icon" href="http://localhost:9000/parent/images/favicon.jpg" type="image/x-icon"> 
+<link  href="http://localhost:9000/parent/stylesheet/vertical_menu.css" rel="stylesheet"> 
+<title>Trader Blotter</title>
+</head>
+<body>
+<div id="banner" ><img src="http://localhost:9000/parent/images/banner.jpg"><img style="float :right" src="http://localhost:9000/parent/images/trader.jpg"></div>
+<div id="header"><img src="http://localhost:9000/parent/images/header.jpg"></div>
+<table style="border: 0px; width: 100%;">
+<tr>
+<td style="width: 15%;margin-top: 2em;font-size:12px;">
+<div id="menu" style="margin-top: 2em; ">
+  <ul>
+    <li><a href="javascript:displayGrid();"  title="Home">Home</a></li>
+    <li><a href="#form"  id="form" title="form">Trader Form</a></li>
+    <li><a href="" title="Services">Services</a></li>
+    <li><a href="" title="Portfolio">Portfolio</a></li>
+    <li><a href="" title="Store">Store</a></li>
+    <li><a href="" title="Download">Download Menu</a></li>
+	
+  </ul>
+</div>
+</td>
+<td style="width: 80%; padding-left: 2em; margin-top: 1em;">
+<div id="grid-example" style=" "></div>
+<div id="tradeForm" style="padding-left: 2em; margin-top: 1em;display :none;"></div>
+</td>
+</tr>
+</table >
+<table>
+<tr>
+<td></td>
+<td id="tabid" style="border : 1px solid #B8CFEE;vertical-align: top;display:none;">
+<table>
+<tr><td id="msg" align="left" style="background-color: #B8CFEE;border : 1px solid #B8CFEE;color:#0440A4;font-size:11px;display:none;"><b>Messages From Other Applications :</b></td>
+</tr>
+<tr>
+<td id="div" style="display:none;font-size: 12px">
+<div id="test" style="margin-left: 2em;margin-top:2em;margin-bottom: 2em; color: #0440A4;"></div>
+<div id="ackMessage" style="margin-left: 2em;margin-bottom: 2em; color: #0440A4;"></div>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+<script src="http://cdn.sencha.com/ext/gpl/4.2.0/ext-all.js"></script>
+<script src="http://localhost:9000/parent/scripts/httpstateprovider.js"></script>
+<script src="http://localhost:9000/parent/scripts/messagebus.js"></script>
+<script>
+
+Ext.require([
+             'Ext.grid.*',
+             'Ext.data.*',
+             'Ext.util.*',
+             'Ext.state.*'
+         ]);
+
+         Ext.onReady(function() {
+             Ext.QuickTips.init();
+             var cp = Ext.create('ParentApp.util.HttpStorageProvider',{
+    			 userid: 'company',
+    			 url: "http://localhost:9000/parent/state"
+    		});
+            Ext.state.Manager.setProvider(cp); 
+
+            Ext.util.Observable.observe(Ext.ux.MessageBroker);
+        	Ext.ux.MessageBroker.on('message', function(msg) {
+        	    console.log('message fired: ',msg);
+        	    window.opener.postMessage(msg, "http://localhost:9000/");
+        	});
+             // sample static data for the store
+             var myData = [
+                 ['74168158','650/SUBALLOCATE','Sell','45,000','182306WG1','MUNI','100','100','1.50','22.50',' ','45,000','45,000','MUNGOBD','CLARKSTONE N Y 3,500 05/15/13 V'],
+                 ['74168132',' ','BUY','2,00,000','912828VD9','TREAS','98.687158','2','2.00','200.00',' ','2,813,041.22','2,816,465.13','TNOTE','UST 0.25 05/31/2015'],
+				 ['74168074','650/SUBALLOCATE','BUY','45,000','182306WG1','MUNI','100','100','1.50','0.00',' ','45,000','45,000','MUNGOBD','CLARKSTONE N Y 3,500 05/15/13 V'],
+				 ['74167998',' ','BUY','2,00,000','912810FG8','TREAS','140.652061','2','2.00','80.00',' ','1,951,100.62','1,962,295.98','TBOND','UST 5.25 2/15/2029'],
+				 ['74167458',' ','BUY','2,00,000','912828JX9','TREAS','102','102','1.6499','0.00',' ','2,263,971.6','2,269,482.85','TNOTE','TIPS UST 2.125 1/15/2019'],				 
+				 ['74164156',' ','BUY','2,00,000','912852FH7','TREAS','102','102','7.7854','1.00',' ','2,263,971.6','2,269,482.85','TNOTE','TIPS UST 2.125 1/15/2019'],
+				 ['74163147',' ','BUY','2,00,000','912828AF8','TREAS','102','102','1.78952','3.56',' ','2,263,971.6','2,269,482.85','TNOTE','TIPS UST 2.125 1/15/2019'],
+				 ['741621462',' ','BUY','2,00,000','912758GH9','TREAS','102','102','5.4578','0.55',' ','2,263,971.6','2,269,482.85','TNOTE','TIPS UST 2.125 1/15/2019'],
+				 ['74168186',' ','BUY','2,00,000','924824BK9','TREAS','98.475856','2','2.00','200.00',' ','2,817,045.72','1,845,455.13','TNOTE','UST 0.25 05/31/2015'],
+				 ['74167123',' ','BUY','2,00,000','90142FBD4','TREAS','98.455458','2','2.00','200.00',' ','2,855,041.22','2,816,365.23','TNOTE','UST 0.25 05/31/2015'],
+				 ['74164253',' ','BUY','2,00,000','912828VD9','TREAS','98.627148','2','2.00','200.00',' ','2,813,041.22','2,816,465.13','TNOTE','UST 0.25 05/31/2015'],
+				 ['74160124','650/SUBALLOCATE','Sell','45,000','182306WG1','MUNI','100','100','1.50','22.50',' ','45,000','45,000','MUNGOBD','CLARKSTONE N Y 3,500 05/15/13 V'],
+				 ['74161478','650/SUBALLOCATE','Sell','45,000','182306WG1','MUNI','100','100','1.50','22.50',' ','45,000','45,000','MUNGOBD','CLARKSTONE N Y 3,500 05/15/13 V'],
+				 ['74167789','650/SUBALLOCATE','Sell','45,000','182306WG1','MUNI','100','100','1.50','22.50',' ','45,000','45,000','MUNGOBD','CLARKSTONE N Y 3,500 05/15/13 V'],
+				 ['74160145','650/SUBALLOCATE','Sell','45,000','182306WG1','MUNI','100','100','1.50','22.50',' ','45,000','45,000','MUNGOBD','CLARKSTONE N Y 3,500 05/15/13 V'],
+				 ['74145156',' ','BUY','2,00,000','912852FH7','TREAS','102','102','7.7854','1.00',' ','2,263,971.6','2,269,482.85','TNOTE','TIPS UST 2.125 1/15/2019'],
+				 ['74165453',' ','BUY','2,00,000','912828VD9','TREAS','98.687158','2','2.00','200.00',' ','2,813,041.22','2,816,445.43','TNOTE','UST 0.25 05/31/2015'],
+				 ['74165758',' ','BUY','2,00,000','912828VD9','TREAS','98.687158','2','2.00','200.00',' ','2,813,041.22','2,786,42465.46','TNOTE','UST 0.25 05/31/2015'],
+				 ['74167785',' ','BUY','2,00,000','912828VD9','TREAS','98.687158','2','2.00','200.00',' ','2,813,041.22','2,816,785.79','TNOTE','UST 0.25 05/31/2015'],
+				 ['74164755',' ','BUY','2,00,000','912828VD9','TREAS','98.687158','2','2.00','200.00',' ','2,813,041.22','2,897,468.13','TNOTE','UST 0.25 05/31/2015'],
+				 ['74165453',' ','BUY','2,00,000','912828VD9','TREAS','98.687158','2','2.00','200.00',' ','2,813,041.22','2,816,445.43','TNOTE','UST 0.25 05/31/2015'],
+				 ['74165758',' ','BUY','2,00,000','912828VD9','TREAS','98.687158','2','2.00','200.00',' ','2,813,041.22','2,786,42465.46','TNOTE','UST 0.25 05/31/2015'],
+				 ['74145145',' ','BUY','2,00,000','912828VD9','TREAS','98.687158','2','2.00','200.00',' ','2,813,041.22','1,914,455.15','TNOTE','UST 0.25 05/31/2015'],
+				 ['74168785','650/SUBALLOCATE','Sell','45,000','27306GS1','MUNI','100','100','1.50','22.50',' ','45,000','45,000','MUNGOBD','CLARKSTONE N Y 3,500 05/15/13 V'],
+				 ['74161425','650/SUBALLOCATE','Sell','45,000','182306WG7','MUNI','100','100','1.50','22.50',' ','45,000','45,000','MUNGOBD','CLARKSTONE N Y 3,500 05/15/13 V'],
+				 ['74450124','650/SUBALLOCATE','Sell','45,000','182306WG1','MUNI','100','100','1.50','22.50',' ','45,000','45,000','MUNGOBD','CLARKSTONE N Y 3,500 05/15/13 V'],
+				 ['74166458','650/SUBALLOCATE','Sell','45,000','19706FS9','MUNI','100','100','1.50','22.50',' ','45,000','45,000','MUNGOBD','CLARKSTONE N Y 3,500 05/15/13 V'],
+				 ['74161455','650/SUBALLOCATE','Sell','45,000','18230WF4','MUNI','100','100','1.50','22.50',' ','45,000','45,000','MUNGOBD','CLARKSTONE N Y 3,500 05/15/13 V'],
+				 ['74162234',' ','BUY','2,00,000','912758G79','TREAS','102','102','5.4578','0.55',' ','2,263,971.6','2,269,482.85','TNOTE','TIPS UST 2.125 1/15/2019'],
+				 ['74162058',' ','BUY','2,00,000','912828VD9','TREAS','98.687158','2','2.00','200.00',' ','2,813,041.22','2,786,42465.46','TNOTE','UST 0.25 05/31/2015'],				 
+				 ['74168456',' ','BUY','2,00,000','924878BK9','TREAS','98.47578','2','2.00','200.00',' ','2,717,04.72','1,847,445.13','TNOTE','UST 0.25 05/31/2015'],
+				 ['74168158','650/SUBALLOCATE','Sell','45,000','478546WG1','MUNI','100','100','1.50','22.50',' ','45,000','45,000','MUNGOBD','CLARKSTONE N Y 3,500 05/15/13 V']
+             ];
+
+             /**
+              * Custom function used for column renderer
+              * @param {Object} val
+              */
+             function Side(val) {
+                 if (val=='BUY') {
+                     return '<span style="color:green;">' + val + '</span>';
+                 } else {
+                     return '<span style="color:red;">' + val + '</span>';
+                 }
+                 return val;
+             }
+
+             /**
+              * Custom function used for column renderer
+              * @param {Object} val
+              */
+             function Price(val) {
+                 if (val > 100) {
+                     return '<span style="color:green;">' + val + '%</span>';
+                 } else if (val < 100) {
+                     return '<span style="color:red;">' + val + '%</span>';
+                 }
+                 return val;
+             }
+			 function Yield(val) {
+                 if (val =='2.00') {
+                     return '<span style="color:green;">' + val + '%</span>';
+                 } else  {
+                     return '<span style="color:red;">' + val + '%</span>';
+                 }
+                 return val;
+             }
+			  function Qty(val) {
+                 if (val =='2,00,000') {
+                     return '<span style="color:green;">' + val + '%</span>';
+                 } else  {
+                     return '<span style="color:red;">' + val + '%</span>';
+                 }
+                 return val;
+             }
+			   function TotalCash(val) {
+                 if (val =='45,000') {
+                     return '<span style="color:green;">' + val + '%</span>';
+                 } else  {
+                     return '<span style="color:red;">' + val + '%</span>';
+                 }
+                 return val;
+             }
+
+             // create the data store
+             var store = Ext.create('Ext.data.ArrayStore', {
+                 fields: [
+                    {name: 'TSTradeNumber'},
+                    {name: 'Account'},
+                    {name: 'Side'},
+					{name: 'Qty'},
+					{name: 'Symbol'},
+					{name: 'SecurityType'},
+					{name: 'Price'},
+					{name: 'PriceText'},
+					{name: 'Yield'},
+					{name: 'TotalComm'},
+					{name: 'Spread'},
+					{name: 'Principal'},
+					{name: 'TotalCash'},
+					{name: 'SecuritySubType'},
+					{name: 'Security'}					                                    
+                 ],
+                 data: myData
+             });
+
+             // create the Grid
+             var grid = Ext.create('Ext.grid.Panel', {
+                 store: store,
+                 stateful: true,
+                 stateId: 'companyGrid',
+				 id: 'traderGrid',
+                 columns: [
+                     {
+                         text     : 'TS Trade Number',
+                         flex     : 1,
+                         sortable : false,
+                         dataIndex: 'TSTradeNumber'
+                     },
+                     {
+                         text     : 'Account',
+                         width    : 75,
+                         sortable : true,                        
+                         dataIndex: 'Account'
+                     },
+                     {
+                         text     : 'Side',
+                         width    : 75,
+                         sortable : true,
+						 renderer : Side,
+                         dataIndex: 'Side'
+                     },
+                     {
+                         text     : 'Qty',
+                         width    : 75,
+                         sortable : true, 
+						 renderer : Qty,
+                         dataIndex: 'Qty'
+                     },
+					  {
+                         text     : 'Symbol',
+                         width    : 75,
+                         sortable : true,                        
+                         dataIndex: 'Symbol'
+                     },
+					 {
+                         text     : 'Security Type',
+                         width    : 75,
+                         sortable : true,                       
+                         dataIndex: 'SecurityType'
+                     },
+					  {
+                         text     : 'Price',
+                         width    : 75,
+                         sortable : true, 
+						 renderer : Price,
+                         dataIndex: 'Price'
+                     },
+					 {
+                         text     : 'Price Text',
+                         width    : 75,
+                         sortable : true,                         
+                         dataIndex: 'PriceText'
+                     },
+					 {
+                         text     : 'Yield',
+                         width    : 75,
+                         sortable : true,   
+						 renderer : Yield,
+                         dataIndex: 'Yield'
+                     },
+					 {
+                         text     : 'Total Comm',
+                         width    : 75,
+                         sortable : true,                         
+                         dataIndex: 'TotalComm'
+                     },
+					 {
+                         text     : 'Spread',
+                         width    : 75,
+                         sortable : true,                         
+                         dataIndex: 'Spread'
+                     },
+					 {
+                         text     : 'Principal',
+                         width    : 75,
+                         sortable : true,                         
+                         dataIndex: 'Principal'
+                     },
+					 {
+                         text     : 'TotalCash',
+                         width    : 75,
+                         sortable : true, 
+						 renderer : TotalCash,
+                         dataIndex: 'TotalCash'
+                     },
+					 {
+                         text     : 'Security Sub Type',
+                         width    : 75,
+                         sortable : true,                        
+                         dataIndex: 'SecuritySubType'
+                     },
+					 {
+                         text     : 'Security',
+                         width    : 75,
+                         sortable : true,                         
+                         dataIndex: 'Security'
+                     },
+					 {
+                         xtype: 'actioncolumn',
+                         width: 50,
+                         items: [{
+                             icon   : 'http://dev.sencha.com/deploy/ext-4.0.1/examples/shared/icons/fam/cog.gif',  // Use a URL in the icon config
+                             tooltip: 'Notify Risk Blotter',
+                             handler: function(grid, rowIndex, colIndex) {
+                                 var rec = store.getAt(rowIndex);
+                                 console.log("Sell " + rec.get('TSTradeNumber'));
+                                 Ext.ux.MessageBroker.sendMessage("Notify Risk Blotter App:", {"TSTradeNumber": rec.get('TSTradeNumber'), "system":"Trader"});
+                             }
+                         }]
+                     }
+                 ],
+				 
+				handler: 
+				setInterval(function(){	
+				var x = Math.floor((Math.random() * 30) + 1);
+                grid.getView().refresh();
+               // grid.getView().focusRow(x); 
+				//var pricevalue=grid.getStore().getAt(x).data.Price;
+				var pricevalue= Math.floor(grid.getStore().getAt(x).data.Price);
+				pricevalue=(pricevalue+pricevalue+5)/2;		
+				grid.getStore().getAt(x).data.Price=pricevalue;
+				var yieldvalue=Math.floor(grid.getStore().getAt(x).data.Yield);
+				yieldvalue=(yieldvalue+yieldvalue+5)/2;
+				grid.getStore().getAt(x).data.Yield=yieldvalue;
+				//alert(pricevalue);							
+                },500),
+                 height: 350,
+                 width: 1100,
+                 title: 'Trade Blotter',
+                 renderTo: 'grid-example',
+                 viewConfig: {
+                     stripeRows: true
+                 }
+				 
+             });
+    });
+
+		 
+	
+		 
+		 
+        //respond to events
+		function listener(event) {
+			if(event.origin !== 'http://localhost:9000') return;
+			
+			//alert(event.origin);
+			
+			  if(event.origin == 'http://localhost:9000' && event.data.data.idname == 'Submit') {
+			        document.getElementById("tabid").style.display = 'block';
+					document.getElementById("msg").style.display = 'block';
+					document.getElementById("div").style.display = 'block';
+          			document.getElementById("ackMessage").innerHTML = 'Received response from  Risk Blotter : '+event.data.msg +': Cusip:' + event.data.data.Cusip ;
+					event.source.postMessage('Acknowledged message',event.origin);
+          		}else{
+				    document.getElementById("tabid").style.display = 'block';
+					document.getElementById("msg").style.display = 'block';
+					document.getElementById("div").style.display = 'block';
+					document.getElementById("test").innerHTML = 'Received response from '+event.data.data.system+':  '+event.data.msg +': Cusip:' + event.data.data.Cusip;
+					event.source.postMessage('Acknowledged message',event.origin);
+				}
+          		
+			
+		}
+		
+		if(window.addEventListener) {
+			addEventListener("message", listener, false);
+		}
+		else {
+			attachEvent("onmessage", listener);
+		}
+		
+		Ext.get('form').on('click',function(){	
+         if(document.getElementById("tradeForm").innerHTML == "")
+			{
+			document.getElementById("grid-example").style.display = 'none';			
+		document.getElementById("tradeForm").style.display = 'block';
+		Ext.create('Ext.form.Panel', {
+			title: 'Trade Form',
+			bodyPadding: 5,
+			height: 170,
+			width: 600,
+			// Fields will be arranged vertically, stretched to full width
+			layout: 'anchor',
+			defaults: {
+				anchor: '100%'
+			},
+
+			// The fields
+			defaultType: 'textfield',
+			items: [{
+				fieldLabel: 'TS Trade Number',
+				name: 'TradeNumber',
+				allowBlank: false
+			},{
+				fieldLabel: 'Account',
+				name: 'tradeAccount',
+				allowBlank: false
+			},{
+				fieldLabel: 'Side',
+				name: 'tradeSide',
+				allowBlank: false
+			},{
+				fieldLabel: 'Qty',
+				name: 'tradeQty',
+				allowBlank: false
+			}],
+
+			// Reset and Submit buttons
+			buttons: [{
+			 text     : 'Submit',
+			  id : 'Submit',
+			 listeners: {
+				click:  function() {
+			
+				var form = this.up('form').getForm();
+				var tnumber = form.findField("TradeNumber").getValue();
+				var tact = form.findField("tradeAccount").getValue();
+				var tside = form.findField("tradeSide").getValue();
+				var tqty = form.findField("tradeQty").getValue();
+				if(!tnumber.match(/^[0-9]+$/)){
+					  alert("TS Trade  Number should be Numeric only");
+					  return;
+				}
+				
+				
+				if(!tside.match(/^[A-Za-z\s]+$/)){
+					alert("Side should Either BUY or SEll");
+					return;
+				}
+				
+				if (!tqty.match(/^[0-9]+$/)){
+					alert(" Qty should be Numeric only");
+					return;
+				}							
+				
+					
+				var id =this.id;
+				alert ("Message is sent to Risk Blotter and Web conductor");				
+				Ext.ux.MessageBroker.sendMessage("Trade has been added: ", {"TSTradeNumber": tnumber, "system":"Risk","idname": id});
+						form.reset();					
+					}
+			}
+			}],
+			 renderTo: 'tradeForm'
+		});	
+			}		 
+		
+	        	});
+		
+		
+		
+		function displayGrid(){
+		document.getElementById('grid-example').style.cssText = ''
+		document.getElementById("tradeForm").innerHTML= '';
+		}
+</script>
+</body>
+
+</html>

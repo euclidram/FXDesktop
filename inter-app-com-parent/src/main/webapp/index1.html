@@ -1,0 +1,470 @@
+<html>
+<head>
+<link
+	href="http://cdn.sencha.com/ext/gpl/4.2.0/resources/css/ext-all.css"
+	rel="stylesheet" />
+<link rel="icon" href="http://localhost:9000/parent/images/favicon.jpg"
+	type="image/x-icon">
+<link href="http://localhost:9000/parent/stylesheet/vertical_menu.css"
+	rel="stylesheet">
+<script type="text/javascript" src="scripts/jquery.js"></script>
+<script type="text/javascript" src="scripts/jqueryUI.js"></script>
+<link rel="stylesheet" href="stylesheet/reset.css" />
+<link rel="stylesheet" href="stylesheet/estilos.css" />
+<link rel="stylesheet" href="stylesheet/jqStyle.css" />
+<script src="scripts/notas.js"></script>
+<title>Web Conductor</title>
+</head>
+<body>
+	<div id="banner">
+		<img src="http://localhost:9000/parent/images/banner.jpg"><img
+			style="float: right; padding_top: 2em;"
+			src="http://localhost:9000/parent/images/appname.jpg">
+	</div>
+	<div id="header">
+		<img src="http://localhost:9000/parent/images/header.jpg">
+	</div>
+	<table style="border: 0px; width: 100%;">
+		<tr>
+			<td style="width: 15%; vertical-align: top;">
+				<div id="tree-example" style="margin-left: 0.5em; margin-top: 1em;">
+				</div>
+			</td>
+			<td style="width: 70%; vertical-align: top;">
+				<div id="tabpanel-example"
+					style="padding-left: 1em; margin-top: 1em;"></div>
+			</td>
+			<td style="width: 15%; vertical-align: top;">
+				<div id="widgetpanelex" style="margin-top: 1em;"></div>
+			</td>
+		</tr>
+	</table>
+	<table id="tabID">
+		<tr><td><div id="saveWorkspace" style="margin-left : 2em;margin-right: 2em;height: 200px"></div></td>
+			<td id="tradermsg" align="left"
+				style="background-color: #B8CFEE; color: #0440A4; font-size: 12px; display: none;"><b>Messages
+					From Trader Blotter :</b></td>
+			<td id="riskmsg"
+				style="background-color: #B8CFEE; color: #0440A4; font-size: 12px; display: none;"><b>Messages
+					From Risk Blotter :</b></td>
+		</tr>
+		<tr>
+			<td id="trader" align="left"
+				style="padding: 2em; border: 1px solid #B8CFEE; display: none; font-size: 12px">
+				<div id="tradeackMessage" style="color: #0440A4;"></div>
+				<div id="tradeMessage" style="color: #0440A4;"></div>
+			</td>
+			<td id="risk"
+				style="padding: 2em; border: 1px solid #B8CFEE; display: none; font-size: 12px">
+				<div id="riskackMessage" style="color: #0440A4;"></div>
+				<div id="riskmessage" style="color: #0440A4;"></div>
+			</td>
+		</tr>
+	</table>
+	<script src="http://cdn.sencha.com/ext/gpl/4.2.0/ext-all.js"></script>
+	<script src="scripts/messagebus.js"></script>
+	<script src="scripts/prototype.js"></script>
+	<script>
+		var traderWin, riskWin,rworkspace,form,tabs;
+
+		Ext.require([ 'Ext.data.*', 'Ext.grid.*', 'Ext.tree.*',
+				'Ext.state.CookieProvider', 'Ext.window.Window' ]);
+		Ext.onReady(function() {
+
+					Ext.state.Manager.setProvider(new Ext.state.CookieProvider());
+					// Recieving a message:
+
+					Ext.util.Observable.observe(Ext.ux.MessageBroker);
+					Ext.ux.MessageBroker.on('message', function(msg) {
+						console.log('message fired: ', msg);
+					});
+
+					// Working on tab panel
+
+					tabs = Ext.create('Ext.tab.Panel',
+									{
+										region : 'center',
+										id : 'myTabPanelId',
+										height : 420,
+										margins : '0,0,0,0',
+										resizeTabs : true,
+										bodyPadding : 10,
+										activeTab : 0,
+										stateEvents : [ 'tabchange' ],
+										stateful : true,
+										stateId : 'tabpanel-demo',
+										renderTo : 'tabpanel-example',
+										items : [
+												{
+													id : 'tab1',
+													title : 'Home',
+													iconCls : 'tabs',
+													contentE1 : 'center',
+													html : '<iframe src="home.html" frameborder="0" width="100%" height="100%"></iframe>',
+													itemId : 'one'
+												},
+
+										],
+
+										getState : function() {
+											return {
+												activeTab : this.items
+														.findIndex('id',this.getActiveTab().id)
+											};
+										},
+										applyState : function(s) {
+											
+											this.setActiveTab(s.activeTab);
+										}
+									});
+
+					function addurlTab(tabTitle) {
+						var urltab = tabs.child('#' + tabTitle);
+						if (!urltab) {
+							urltab = Ext
+									.getCmp('myTabPanelId')
+									.add(
+											{
+												title : tabTitle,
+												id : tabTitle,
+												iconCls : "tabs",
+												setActiveTab : true,
+												html : ' <iframe src="http://localhost:9085/risk/" frameborder="0" width="100%" height="100%"></iframe>',
+												closable : true
+											});
+
+						}
+						tabs.setActiveTab(urltab);
+					}
+					////////////////////////////// end of tab
+				var widgetPanelform = Ext.create('Ext.panel.Panel', {
+						layout : 'border',	
+						height:420,
+						defaults : {
+							collapsible : true,
+							split : true,
+							bodyStyle : 'padding:10px'
+						},
+						
+						items : [ {
+				            region: 'east',
+				            floatable: true,
+				            collapsible : true,
+							split : true,
+				            width:190,
+				            minWidth: 80,
+				            minHeight: 420,
+				            title: 'Widget Panel',
+				            layout: {
+				                type: 'vbox',
+				                padding: 5,
+				                align: 'stretch'
+				            },
+				            items: [{
+				                xtype: 'textfield',
+				                labelWidth: 70,
+				                fieldLabel: 'Text field'
+				            }, {
+				                xtype: 'component',
+				                html: 'I am floatable'
+				            }],
+				        }],
+						renderTo:'widgetpanelex'
+					});
+					/////////////////////////////// end of right widget panel
+						
+					/////////////////////////////////	
+					var workspaceform = Ext.create('Ext.form.Panel',
+									{
+										title : 'Save Workspace',
+										bodyPadding : 5,
+										id : 'workspaceId',
+										height : 200,
+										width : 350,
+										// Fields will be arranged vertically, stretched to full width
+										layout:'anchor',
+										
+										items : [ {
+											fieldLabel : 'Workspace',
+											xtype: 'textfield',
+											name : 'Workspace',
+											value : '',
+											allowBlank : false,
+											anchor : '100%'
+										} ,
+										
+										{
+											xtype: 'button',
+								            text: 'Save',
+								            width: 60,
+								            align: 'right',
+								            id:'myButton',
+								            anchor : '20%',
+								            listeners : {
+												click : function() {
+
+													form = this.up('form')
+															.getForm();
+													rworkspace = form
+															.findField("Workspace")
+															.getValue();													
+													var id = this.id;
+													addformField(rworkspace);
+													alert(rworkspace + " Workspace Saved");
+													form.findField("Workspace")
+															.reset();
+													}
+												}								            	
+								            },
+								            
+										],										
+										renderTo : 'saveWorkspace'
+									});
+					
+					Ext.get('myButton').on('click',function(){
+						
+						var activeTab = tabs.getActiveTab();
+						var activeTabIndex = tabs.items.findIndex('id', activeTab.id);
+							
+						// add new button on workspace name
+						createWorkspaceButton(activeTabIndex);
+						
+						
+						
+						//alert(rworkspace +" workspace created");
+						form.findField("Workspace").reset();
+			        });
+					
+					function createWorkspaceButton(activeTabIndex){
+						
+						var tf =Ext.create('Ext.Button', {
+					    text: rworkspace,
+					    anchor : '20%',
+					    handler: function() {
+					        tabs.setActiveTab(activeTabIndex);
+					    	//alert("Button Clicked");
+					    }
+					});
+					
+					workspaceform.add(tf);
+					}
+					///////////////////////////////
+						
+					//we want to setup a model and store instead of using dataUrl
+					Ext.define('Task', {
+						extend : 'Ext.data.Model',
+						fields : [ {
+							name : 'application',
+							type : 'string'
+						}, {
+							name : 'url',
+							type : 'string'
+						}, {
+							name : 'duration',
+							type : 'string'
+						}, {
+							name : 'appcontext',
+							type : 'string'
+						} ]
+					});
+					var store = Ext.create('Ext.data.TreeStore', {
+						model : 'Task',
+						proxy : {
+							type : 'ajax',
+							//the store will get the content from the .json file
+							url : 'treegrid.json'
+						},
+						folderSort : true
+					});
+
+					//Ext.ux.tree.TreeGrid is no longer a Ux. You can simply use a tree.TreePanel
+					var tree1 = Ext.create('Ext.tree.Panel', {
+		                 title: 'Tasks',
+		                 layout:'fit',
+		                 height:420,
+						 itemId:'navTree',
+						 renderTo:'tree-example',
+		                 style: 'margin-top: 10px;',
+		                 collapsible: true,
+		                 useArrows: true,
+		                 rootVisible: false,
+		                 xtype:'treepanel',
+		                 store: store,
+		                 listeners: {
+		                     itemclick: {
+		                         fn: function (view, record, item, index, e) {
+		                             console.log(record.raw.url);
+		             	        	// Sending a message:
+		             	        	Ext.ux.MessageBroker.sendMessage("load_stock", {"url": record.raw.url});
+
+		                             if(record.raw.application === 'Trader') {
+			                          
+			                             traderWin = window.open(record.raw.url+"/"+record.raw.appcontext, record.raw.application);			  
+		                             }
+		                             else if(record.raw.application === 'Risk') {		                        
+			                            	 riskWin = window.open(record.raw.url+"/"+record.raw.appcontext, record.raw.application);		                            
+		                             } else if(record.raw.application === 'RiskForm'){
+									 riskForms = window.open(record.raw.url+"/"+record.raw.appcontext, record.raw.application);
+									 }
+									 else if(record.raw.application === 'TraderForm'){
+									 tradeForm = window.open(record.raw.url+"/"+record.raw.appcontext, record.raw.application);
+									 }
+		                         }
+		                     },
+							 itemcontextmenu: function(view, rec, node, index, e) {
+									 var newTab = Ext.create('Ext.Action', {        
+									text:'open in newTab',							
+									handler: function(widget, event) {						
+									if(rec.raw.application === 'Trader') {		                          
+			                         traderWin = window.open(rec.raw.url+"/"+rec.raw.appcontext, rec.raw.application);			  
+		                             }
+		                             else if(rec.raw.application === 'Risk') {		                        
+			                            	 riskWin = window.open(rec.raw.url+"/"+rec.raw.appcontext, rec.raw.application);		                            
+		                             } else if(rec.raw.application === 'RiskForm'){
+									 riskForms = window.open(rec.raw.url+"/"+rec.raw.appcontext, rec.raw.application);
+									 }
+									 else if(rec.raw.application === 'TraderForm'){
+									 tradeForm = window.open(rec.raw.url+"/"+rec.raw.appcontext, rec.raw.application);
+									 }																	
+									}
+								});	
+								var samepage = Ext.create('Ext.Action', {							
+									text:'Open in samepage',							
+									handler: function(widget, event) {									
+										if(rec.raw.application==='Trader')
+										{
+										var ta = tabs.child('#'+rec.raw.application);
+											 if(!ta){
+												 ta = tabs.add({
+													 id:rec.raw.application,
+													 title: rec.raw.application,
+													 iconCls:'tabs',											
+													 html:'<iframe src="http://localhost:8085/trader/" width="100%" height="100%"></iframe>',
+													 itemId:rec.raw.application,
+													 closable:true
+												 });
+											 }
+											 tabs.setActiveTab(ta);
+										}else if(rec.raw.application === 'Risk') {		                        
+			                            	 	 if(!ta){
+												 ta = tabs.add({
+													 id:rec.raw.application,
+													 title: rec.raw.application,
+													 iconCls:'tabs',											
+													 html:'<iframe src="http://localhost:9085/risk/" width="100%" height="100%"></iframe>',
+													 itemId:rec.raw.application,
+													 closable:true
+												 });
+											 }
+											 tabs.setActiveTab(ta);		                            
+		                             } else if(rec.raw.application === 'RiskForm'){
+									 	 if(!ta){
+												 ta = tabs.add({
+													 id:rec.raw.application,
+													 title: rec.raw.application,
+													 iconCls:'tabs',											
+													 html:'<iframe src="http://localhost:9085/risk/#form" width="100%" height="100%"></iframe>',
+													 itemId:rec.raw.application,
+													 closable:true
+												 });
+											 }
+											 tabs.setActiveTab(ta);
+									 }
+									 else if(rec.raw.application === 'TraderForm'){
+									 	 if(!ta){
+												 ta = tabs.add({
+													 id:rec.raw.application,
+													 title: rec.raw.application,
+													 iconCls:'tabs',											
+													 html:'<iframe src="http://localhost:8085/trader/#form" width="100%" height="100%"></iframe>',
+													 itemId:rec.raw.application,
+													 closable:true
+												 });
+											 }
+											 tabs.setActiveTab(ta);
+									 }																
+									}
+								});						   						
+							 var contextMenu = Ext.create('Ext.menu.Menu', {
+									items: [
+										newTab,
+										samepage
+									]
+								});
+								e.stopEvent();
+								contextMenu.showAt(e.getXY());
+								return false;
+							}
+		                 },
+						 
+						viewConfig: {
+						stripeRows: true,
+						
+					},
+						 
+						 
+						 
+		                 //the 'columns' property is now 'headers'
+		                 columns: [{
+		                     xtype: 'treecolumn', //this is so we know which column will show the tree
+		                     text: '',
+		                     flex: 2,
+		                     sortable: true,
+		                     dataIndex: 'application'
+		                 }]
+		             });
+				});
+		//listen to holla back
+
+		function listener(event) {
+			if (event.origin !== 'http://localhost:8085'
+					&& event.origin !== 'http://localhost:9085')
+				return;
+			if (event.origin == 'http://localhost:8085'
+					&& event.data.data.idname == 'Submit') {
+				document.getElementById("tabID").style.display = 'block';
+				document.getElementById("tradermsg").style.display = 'block';
+				document.getElementById("trader").style.display = 'block';
+				document.getElementById("tradeackMessage").innerHTML = 'Received response from Trader:  '
+						+ event.data.msg
+						+ ': TS Trade Number:'
+						+ event.data.data.TSTradeNumber;
+			} else if (event.origin == 'http://localhost:8085') {
+				document.getElementById("tabID").style.display = 'block';
+				document.getElementById("tradermsg").style.display = 'block';
+				document.getElementById("trader").style.display = 'block';
+				document.getElementById("tradeMessage").innerHTML = 'Received response from Trader:  '
+						+ event.data.msg
+						+ ': TS Trade Number:'
+						+ event.data.data.TSTradeNumber;
+			}
+			if (event.origin == 'http://localhost:9085'
+					&& event.data.data.idname == 'Submit') {
+				document.getElementById("tabID").style.display = 'block';
+				document.getElementById("riskmsg").style.display = 'block';
+				document.getElementById("risk").style.display = 'block';
+				document.getElementById("riskackMessage").innerHTML = 'Received response from Risk:  '
+						+ event.data.msg + ': Cusip:' + event.data.data.Cusip;
+			} else if (event.origin == 'http://localhost:9085') {
+				document.getElementById("tabID").style.display = 'block';
+				document.getElementById("riskmsg").style.display = 'block';
+				document.getElementById("risk").style.display = 'block';
+				document.getElementById("riskmessage").innerHTML = 'Received response from Risk:  '
+						+ event.data.msg + ': Cusip:' + event.data.data.Cusip;
+			}
+			if (event.origin == 'http://localhost:9085') {
+				traderWin.postMessage(event.data, 'http://localhost:8085');
+			} else if (event.origin == 'http://localhost:8085') {
+				riskWin.postMessage(event.data, 'http://localhost:9085');
+			}
+		}
+
+		if (window.addEventListener) {
+			addEventListener("message", listener, false);
+		} else {
+			attachEvent("onmessage", listener);
+		}
+		
+	</script>
+</body>
+</html>

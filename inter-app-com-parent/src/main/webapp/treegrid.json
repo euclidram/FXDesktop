@@ -1,0 +1,56 @@
+{"text":".","children": [
+    {
+        application:'Risk',
+        duration:13.25,
+        url:'http://localhost:9085',
+        appcontext:'risk',
+        iconCls:'task-folder',
+        expanded:true,
+        leaf:false,
+        children: [{
+                    application:'Risk Form',
+                    text: "Risk Form",
+                    url:'http://localhost:9085',
+       				appcontext:'risk',
+                    leaf: true
+                }, {
+                    application: "Risk Analysis",
+                    leaf: true
+                }]
+    }, 
+    {
+        application:'Trader',
+        duration:13.25,
+        url:'http://localhost:8085',
+        appcontext:'trader',
+        leaf:false,
+	expanded:true,
+        children: [{
+                    application:'Trader Form',
+                    text: "Risk Form",
+                    url:'http://localhost:8085',
+       				appcontext:'trader',
+                    leaf: true
+                }, {
+                    application: "Trader Analysis",
+                    leaf: true
+                }]
+    },
+    {
+        application:'DealerInvention',
+        duration:13.25,
+        url:'http://localhost:9085',
+        appcontext:'dealerInvention',
+        iconCls:'task-folder',
+        leaf:true
+    },
+    {
+        application:'Price',
+        duration:13.25,
+        url:'http://localhost:9085',
+        appcontext:'price',
+        iconCls:'task-folder',
+        leaf:true
+    }
+    
+]}
